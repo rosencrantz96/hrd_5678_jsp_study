@@ -11,9 +11,9 @@
 	<nav>
 		<ul>
 			<li><a href="lookUp">후보조회</a></li>
-			<li><a href="vote">투표하기</a></li>
-			<li><a href="voteResult">투표검수조회</a></li>
-			<li><a href="memberList">후보자등수</a></li>
+			<li><a href="voteMember">투표하기</a></li>
+			<li><a href="voteList">투표검수조회</a></li>
+			<li><a href="voteResult">후보자등수</a></li>
 			<li><a href="home">홈으로</a></li>
 		</ul>
 	</nav>

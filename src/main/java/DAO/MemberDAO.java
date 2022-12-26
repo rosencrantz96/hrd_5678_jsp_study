@@ -21,8 +21,41 @@ public class MemberDAO {
 	// 데이터 베이스 연결
 	public static Connection getConnection() throws Exception {
 		Class.forName("oracle.jdbc.OracleDriver");
-		Connection con = DriverManager.getConnection("jdbc:oracle:thin:@//localhost:1521/xe", "system", "sys1234");
+		Connection con = DriverManager.getConnection("jdbc:oracle:thin:@//localhost:1521/xe", "test", "test1234");
 		return con;
+	}
+	
+	// 투표하기 
+	public int insertVote(HttpServletRequest request, HttpServletResponse response) {
+		int result = 0;
+		try {
+			conn = getConnection();
+			
+			String v_jumin = request.getParameter("v_jumin");
+			String v_name = request.getParameter("v_name");
+			String m_no = request.getParameter("m_no");
+			String v_time= request.getParameter("v_time");
+			String v_area = request.getParameter("v_area");
+			String v_confirm= request.getParameter("v_confirm");
+			
+			String sql = "INSERT INTO tbl_vote_202005 VALUES (?,?,?,?,?,?) ";
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, v_jumin);
+			ps.setString(2, v_name);
+			ps.setString(3, m_no);
+			ps.setString(4, v_time);
+			ps.setString(5, v_area);
+			ps.setString(6, v_confirm);
+			
+			result = ps.executeUpdate(); // 0 실패, 1 성공 
+			conn.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+		
 	}
 
 	// 후보조회 화면
@@ -42,10 +75,10 @@ public class MemberDAO {
 			sql += " substr(M.m_jumin,1,6)|| ";
 			sql += " '-'||substr(M.m_jumin,7) m_jumin, ";
 			sql += " M.m_city, ";
-			sql += " substr(P.p_tel1,1,2)||'-'||P.p_tel2||'-'||";
-			sql += " (substr(P.p_tel3,4)||";
-			sql += "  substr(P.p_tel3,4)||";
-			sql += "  substr(P.p_tel3,4)||";
+			sql += " substr(P.p_tel1,1,2)||'-'||P.p_tel2||'-'|| ";
+			sql += " (substr(P.p_tel3,4)|| ";
+			sql += "  substr(P.p_tel3,4)|| ";
+			sql += "  substr(P.p_tel3,4)|| ";
 			sql += "  substr(P.p_tel3,4)) p_tel ";
 			sql += " FROM tbl_member_202005 M, tbl_party_202005 P ";
 			sql += " WHERE M.p_code = P.p_code";
@@ -74,45 +107,9 @@ public class MemberDAO {
 		return "lookUp.jsp";
 
 	}
-
-	public String memberSelect(HttpServletRequest request, HttpServletResponse response) {
-		ArrayList<Member> list = new ArrayList<Member>();
-		try {
-			conn = getConnection();
-
-			String sql = "SELECT ";
-			sql += " M.m_no, M.m_name, count(*) AS v_total";
-			sql += " FROM tbl_member_202005 M, tbl_vote_202005 V";
-			sql += " WHERE M.m_no = V.m_no AND V.v_confirm = 'Y' ";
-			sql += " GROUP BY M.m_no, M.m_name";
-			sql += " ORDER BY v_total DESC";
-
-			ps = conn.prepareStatement(sql); // 명령어를 보낸다.
-			rs = ps.executeQuery();
-			
-			while (rs.next()) {
-				Member member = new Member();
-
-				member.setM_no(rs.getString(1));
-				member.setM_name(rs.getString(2));
-				member.setV_total(rs.getString(3));
-
-				list.add(member);
-			}
-			request.setAttribute("list", list);
-			conn.close();
-			ps.close();
-			rs.close();
-			
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return "memberList.jsp";
-	}
-
-	public String resultSelect(HttpServletRequest request, HttpServletResponse response) {
+	
+	// 투표검수조회화면 
+	public String selectAll(HttpServletRequest request, HttpServletResponse response) {
 		ArrayList<Vote> vlist = new ArrayList<Vote>();
 		try {
 			conn = getConnection();
@@ -151,6 +148,47 @@ public class MemberDAO {
 			e.printStackTrace();
 		}
 		
+		return "voteList.jsp";
+	}
+
+	// 후보자 등수 화면 
+	public String selectResult(HttpServletRequest request, HttpServletResponse response) {
+		ArrayList<Member> list = new ArrayList<Member>();
+		try {
+			conn = getConnection();
+
+			String sql = "SELECT ";
+			sql += " M.m_no, M.m_name, count(*) AS v_total";
+			sql += " FROM tbl_member_202005 M, tbl_vote_202005 V";
+			sql += " WHERE M.m_no = V.m_no AND V.v_confirm = 'Y' ";
+			sql += " GROUP BY M.m_no, M.m_name";
+			sql += " ORDER BY v_total DESC";
+
+			ps = conn.prepareStatement(sql); // 명령어를 보낸다.
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				Member member = new Member();
+
+				member.setM_no(rs.getString(1));
+				member.setM_name(rs.getString(2));
+				member.setV_total(rs.getString(3));
+
+				list.add(member);
+			}
+			request.setAttribute("list", list);
+			conn.close();
+			ps.close();
+			rs.close();
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return "voteResult.jsp";
 	}
+
+	
+
 }

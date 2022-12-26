@@ -52,14 +52,33 @@ public class VoteController extends HttpServlet {
 		case "/home":
 			site = "index.jsp";
 			break;
+		case "/vote" : 
+			int result = member.insertVote(request, response);
+			response.setContentType("text/html; charset=UTF-8");
+			PrintWriter out = response.getWriter();
+			if(result == 1) {
+				out.println("<script>");
+				out.println("alert('투표하기 정보가 정상적으로 등록 되었습니다!'); location.href='" + context + "';");
+				out.println("</script>");
+				out.flush();
+			} else {
+				out.println("<script>");
+				out.println("alert('등록실패!'); location.href='" + context + "';'");
+				out.println("</script>");
+				out.flush();
+			}
+			break;
 		case "/lookUp":
 			site = member.selectMember(request, response);
 			break;
-		 case "/memberList" : 
-			 site = member.memberSelect(request, response);
+		 case "/voteList" : 
+			 site = member.selectAll(request, response);
+			 break;
+		 case "/voteMember" : 
+			 site = "voteMember.jsp";
 			 break;
 		 case "/voteResult" : 
-			 site = member.resultSelect(request, response);
+			 site = member.selectResult(request, response);
 			 break;
 		}
 		getServletContext().getRequestDispatcher("/" + site).forward(request, response);
